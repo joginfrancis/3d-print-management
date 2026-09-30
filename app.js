@@ -3763,7 +3763,19 @@ document.addEventListener('DOMContentLoaded', () => {
         if (meta.color) config.color = meta.color;
         if (meta.job) Object.assign(config.job, meta.job);
 
-        const geometry  = STLParser.parse(buf.slice(0));
+        let geometry;
+        const is3MF = file.name.toLowerCase().endsWith('.3mf') || (typeof ThreeMFParser !== 'undefined' && ThreeMFParser.is3MF(buf));
+        if (is3MF && typeof ThreeMFParser !== 'undefined') {
+            try {
+                geometry = await ThreeMFParser.parse(buf.slice(0));
+            } catch (err3mf) {
+                console.warn('3MF parse failed, falling back to STL:', err3mf);
+                geometry = STLParser.parse(buf.slice(0));
+            }
+        } else {
+            geometry = STLParser.parse(buf.slice(0));
+        }
+
         const estimates = PrintEstimator.estimate(geometry, config);
 
         // originalTriangles is the canonical print-geometry source — never
@@ -3771,7 +3783,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // and rebuild from originalTriangles when the bed facing resets.
         const entry = {
             id,
-            name: meta.name || file.name.replace(/\.stl$/i, ''),
+            name: meta.name || file.name.replace(/\.(stl|3mf)$/i, ''),
             arrayBuffer: buf,
             geometry,
             triangles: geometry.triangles,
@@ -6244,11 +6256,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
 
                 const arrayBuf = await fileRes.arrayBuffer();
-                const fileObj = new File([arrayBuf], fileName, { type: 'model/stl' });
+                const is3mf = fileName.toLowerCase().endsWith('.3mf');
+                const fileObj = new File([arrayBuf], fileName, { type: is3mf ? 'model/3mf' : 'model/stl' });
 
                 const prof = manifest.profile || {};
                 await addFile(fileObj, {
-                    name: p.bodyName || fileName.replace(/\.stl$/i, ''),
+                    name: p.bodyName || fileName.replace(/\.(stl|3mf)$/i, ''),
                     quantity: p.quantity || 1,
                     material: p.material || 'PLA',
                     color: p.color || '#0d6efd',
