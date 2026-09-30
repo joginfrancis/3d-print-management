@@ -3458,11 +3458,11 @@ body {
 .btn-topbar-plugin {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
     height: 31px;
-    padding: 0 11px;
+    padding: 0 12px;
     border-radius: 6px;
-    font-size: 0.78rem;
+    font-size: 0.79rem;
     font-weight: 600;
     cursor: pointer;
     white-space: nowrap;
@@ -3470,18 +3470,29 @@ body {
     text-decoration: none;
     line-height: 1;
     user-select: none;
-    background: rgba(255, 102, 0, 0.10);
-    color: #e65c00;
-    border: 1px solid rgba(255, 102, 0, 0.32);
+    background: #ffffff;
+    color: var(--c-text);
+    border: 1px solid #cbd5e1;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+.btn-topbar-plugin svg {
+    color: #e65100; /* Autodesk Fusion Orange */
+    flex-shrink: 0;
 }
 .btn-topbar-plugin:hover {
-    background: rgba(255, 102, 0, 0.18);
-    border-color: rgba(255, 102, 0, 0.50);
-    color: #d95300;
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+.btn-topbar-plugin:active {
+    transform: translateY(0);
 }
 .btn-topbar-plugin-badge {
-    background: #ff6600;
-    color: #ffffff;
+    background: rgba(230, 81, 0, 0.10);
+    color: #c2410c;
+    border: 1px solid rgba(230, 81, 0, 0.22);
     font-size: 10px;
     font-weight: 700;
     padding: 1px 6px;
@@ -3489,25 +3500,32 @@ body {
     letter-spacing: 0.02em;
 }
 [data-theme="dark"] .btn-topbar-plugin {
-    background: rgba(255, 120, 20, 0.14);
-    color: #ff8833;
-    border: 1px solid rgba(255, 120, 20, 0.38);
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
 }
 [data-theme="dark"] .btn-topbar-plugin:hover {
-    background: rgba(255, 120, 20, 0.24);
-    border-color: rgba(255, 120, 20, 0.60);
-    color: #ffa355;
+    background: #334155;
+    border-color: #475569;
+    color: #ffffff;
+}
+[data-theme="dark"] .btn-topbar-plugin-badge {
+    background: rgba(251, 146, 60, 0.16);
+    color: #fb923c;
+    border-color: rgba(251, 146, 60, 0.35);
 }
 
 /* ─── Fusion 360 Add-in Modal ───────────────────────────── */
 .fusion-modal-card {
     width: 530px;
     max-width: calc(100% - 32px);
+    border-radius: 12px;
 }
 .fusion-icon-badge {
-    background: rgba(255, 102, 0, 0.14) !important;
-    border-color: rgba(255, 102, 0, 0.35) !important;
-    color: #ff6600 !important;
+    background: rgba(249, 115, 22, 0.12) !important;
+    border-color: rgba(249, 115, 22, 0.28) !important;
+    color: #ea580c !important;
 }
 .fusion-modal-content {
     display: flex;
@@ -3516,28 +3534,31 @@ body {
     margin-top: 4px;
 }
 .fusion-hero-card {
-    background: linear-gradient(135deg, rgba(255, 102, 0, 0.09) 0%, rgba(255, 150, 0, 0.03) 100%);
-    border: 1px solid rgba(255, 102, 0, 0.24);
-    border-radius: var(--radius-sm);
-    padding: 15px 16px;
+    background: #ffffff;
+    border: 1px solid #fed7aa;
+    border-left: 4px solid #f97316;
+    border-radius: 8px;
+    padding: 16px 18px;
     display: flex;
     flex-direction: column;
-    gap: 13px;
+    gap: 12px;
+    box-shadow: 0 2px 8px rgba(249, 115, 22, 0.06);
 }
-[data-theme="light"] .fusion-hero-card {
-    background: linear-gradient(135deg, #fff7ed 0%, #fffbf5 100%);
-    border-color: rgba(255, 102, 0, 0.30);
+[data-theme="dark"] .fusion-hero-card {
+    background: rgba(255, 102, 0, 0.05);
+    border: 1px solid rgba(255, 102, 0, 0.25);
+    border-left: 4px solid #f97316;
 }
 .fusion-hero-text h4 {
     margin: 0 0 5px 0;
-    font-size: 0.94rem;
+    font-size: 0.95rem;
     font-weight: 700;
     color: var(--c-text);
 }
 .fusion-hero-text p {
     margin: 0;
-    font-size: 0.79rem;
-    line-height: 1.45;
+    font-size: 0.81rem;
+    line-height: 1.48;
     color: var(--c-muted);
 }
 .fusion-hero-actions {
@@ -3550,40 +3571,52 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    background: #ff6600;
+    background: linear-gradient(135deg, #f97316, #ea580c);
     color: #ffffff !important;
     text-decoration: none;
-    font-weight: 700;
-    font-size: 0.84rem;
+    font-weight: 600;
+    font-size: 0.83rem;
     padding: 9px 18px;
     border-radius: 6px;
-    box-shadow: 0 2px 8px rgba(255, 102, 0, 0.35);
+    box-shadow: 0 2px 8px rgba(234, 88, 12, 0.32);
     transition: all 0.15s ease;
     cursor: pointer;
     border: none;
 }
 .btn-download-plugin-cta:hover {
-    background: #e65c00;
-    box-shadow: 0 4px 12px rgba(255, 102, 0, 0.45);
+    background: linear-gradient(135deg, #ea580c, #c2410c);
+    box-shadow: 0 4px 12px rgba(234, 88, 12, 0.42);
     transform: translateY(-1px);
+}
+.btn-download-plugin-cta:active {
+    transform: translateY(0);
 }
 .btn-github-plugin {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: var(--c-surface2);
+    background: #ffffff;
     color: var(--c-text) !important;
     text-decoration: none;
     font-weight: 600;
     font-size: 0.82rem;
-    padding: 8px 14px;
+    padding: 8px 16px;
     border-radius: 6px;
-    border: 1px solid var(--c-border);
+    border: 1px solid #cbd5e1;
     transition: all 0.15s ease;
 }
 .btn-github-plugin:hover {
-    background: var(--c-border);
-    color: var(--c-text);
+    background: #f8fafc;
+    border-color: #94a3b8;
+    color: #0f172a;
+}
+[data-theme="dark"] .btn-github-plugin {
+    background: #1e293b;
+    border-color: #475569;
+    color: #f1f5f9 !important;
+}
+[data-theme="dark"] .btn-github-plugin:hover {
+    background: #334155;
 }
 .fusion-steps-wrap {
     display: flex;
@@ -3592,7 +3625,7 @@ body {
 }
 .fusion-steps-title {
     margin: 0;
-    font-size: 0.76rem;
+    font-size: 0.74rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
@@ -3612,48 +3645,62 @@ body {
     gap: 10px;
     font-size: 0.81rem;
     color: var(--c-text);
-    line-height: 1.4;
+    line-height: 1.45;
 }
 .step-badge {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    background: rgba(255, 102, 0, 0.15);
-    color: #ff6600;
+    background: #ffedd5;
+    color: #ea580c;
     font-weight: 700;
     font-size: 11px;
     flex-shrink: 0;
     margin-top: 1px;
 }
+[data-theme="dark"] .step-badge {
+    background: rgba(249, 115, 22, 0.2);
+    color: #fb923c;
+}
 .fusion-install-steps code {
-    background: rgba(0, 0, 0, 0.25);
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
     padding: 2px 6px;
     border-radius: 4px;
     font-size: 0.78rem;
-    font-family: monospace;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
-[data-theme="light"] .fusion-install-steps code {
-    background: rgba(0, 0, 0, 0.06);
+[data-theme="dark"] .fusion-install-steps code {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
 }
 .fusion-install-steps kbd {
-    background: var(--c-surface2);
-    border: 1px solid var(--c-border);
-    padding: 1px 5px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    padding: 2px 6px;
     border-radius: 4px;
     font-size: 0.76rem;
-    box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+[data-theme="dark"] .fusion-install-steps kbd {
+    background: #1e293b;
+    border-color: #475569;
 }
 .fusion-bridge-connect-box {
-    background: var(--c-surface2);
-    border: 1px solid var(--c-border);
-    border-radius: var(--radius-sm);
-    padding: 12px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 13px 15px;
     display: flex;
     flex-direction: column;
     gap: 9px;
+}
+[data-theme="dark"] .fusion-bridge-connect-box {
+    background: #0f172a;
+    border-color: #1e293b;
 }
 .bridge-connect-header {
     display: flex;
@@ -3666,21 +3713,92 @@ body {
 .bridge-connect-row {
     display: flex;
     gap: 8px;
+    align-items: center;
+    width: 100%;
 }
-.bridge-connect-row input {
+.bridge-url-input {
     flex: 1;
-    font-family: monospace;
-    font-size: 0.80rem;
+    min-width: 0;
+    height: 34px;
+    padding: 0 12px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: var(--c-text);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.81rem;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.15s ease;
+}
+[data-theme="dark"] .bridge-url-input {
+    background: #1e293b;
+    border-color: #334155;
+    color: #f1f5f9;
+}
+.bridge-url-input:focus {
+    border-color: var(--c-accent);
+}
+.btn-bridge-connect {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 34px;
+    padding: 0 16px;
+    background: var(--c-accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.81rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.15s ease;
+}
+.btn-bridge-connect:hover {
+    background: var(--c-accent2);
+}
+.btn-bridge-connect:active {
+    transform: scale(0.98);
+}
+.btn-modal-cancel {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 20px;
+    background: #f1f5f9;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #334155;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-modal-cancel:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+[data-theme="dark"] .btn-modal-cancel {
+    background: #1e293b;
+    border-color: #334155;
+    color: #cbd5e1;
+}
+[data-theme="dark"] .btn-modal-cancel:hover {
+    background: #334155;
+    color: #ffffff;
 }
 .empty-fusion-link {
-    color: #ff6600;
+    color: #ea580c;
     text-decoration: underline;
     text-underline-offset: 2px;
     font-weight: 600;
     cursor: pointer;
 }
 .empty-fusion-link:hover {
-    color: #e65c00;
+    color: #c2410c;
 }
 
 
