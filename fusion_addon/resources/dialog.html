@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D PRINT BUILDER</title>
+  <style>
+    :root {
+      --adsk-bg: #f5f5f5;
+      --adsk-panel-bg: #ffffff;
+      --adsk-header-bg: #e8e8e8;
+      --adsk-border: #d4d4d4;
+      --adsk-border-light: #e5e5e5;
+      --adsk-text-main: #262626;
+      --adsk-text-muted: #666666;
+      --adsk-blue: #0696D7;
+      --adsk-blue-hover: #057db3;
+      --adsk-blue-active: #046896;
+      --adsk-blue-light: #e5f3ff;
+      --adsk-blue-border: #99cbee;
+      --adsk-radius: 4px;
+      --adsk-font: 'Artifakt Element', 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: var(--adsk-font);
+      background-color: var(--adsk-bg);
+      color: var(--adsk-text-main);
+      font-size: 12px;
+      line-height: 1.4;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Fusion Title Bar */
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 34px;
+      padding: 0 12px;
+      background: #e5e5e5;
+      border-bottom: 1px solid var(--adsk-border);
+      flex-shrink: 0;
+    }
+    .title-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: 0.4px;
+      color: #1a1a1a;
+      text-transform: uppercase;
+    }
+    .title-left svg {
+      width: 15px;
+      height: 15px;
+    }
+    .dock-icon {
+      width: 15px;
+      height: 15px;
+      color: #666666;
+      cursor: pointer;
+    }
+    .dock-icon:hover {
+      color: #111111;
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 12px 14px 8px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 11px;
+      background: var(--adsk-bg);
+    }
+    .content-area::-webkit-scrollbar {
+      width: 6px;
+    }
+    .content-area::-webkit-scrollbar-thumb {
+      background: #c0c0c0;
+      border-radius: 3px;
+    }
+
+    /* Form Rows (Fusion Standard 2-Column: Label | Input) */
+    .form-row {
+      display: grid;
+      grid-template-columns: 85px 1fr;
+      align-items: start;
+      gap: 10px;
+    }
+    .form-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--adsk-text-main);
+      padding-top: 5px;
+    }
+
+    /* Fusion Style Dropdown */
+    .fusion-select-btn {
+      width: 100%;
+      height: 28px;
+      padding: 0 10px;
+      background: var(--adsk-panel-bg);
+      border: 1px solid var(--adsk-border);
+      border-radius: var(--adsk-radius);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--adsk-text-main);
+      font-family: inherit;
+      transition: border-color 0.12s;
+    }
+    .fusion-select-btn:hover {
+      border-color: #999999;
+    }
+    .fusion-select-btn:focus, .fusion-select-btn.active {
+      border-color: var(--adsk-blue);
+      outline: none;
+    }
+    .fusion-select-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 32px;
+      left: 0;
+      right: 0;
+      background: var(--adsk-panel-bg);
+      border: 1px solid var(--adsk-border);
+      border-radius: var(--adsk-radius);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 50;
+      display: none;
+      overflow: hidden;
+    }
+    .dropdown-menu.open {
+      display: block;
+    }
+    .dropdown-item {
+      padding: 7px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      color: var(--adsk-text-main);
+    }
+    .dropdown-item:hover {
+      background: #f0f0f0;
+    }
+    .dropdown-item.active {
+      background: var(--adsk-blue-light);
+      color: var(--adsk-blue);
+      font-weight: 600;
+    }
+
+    /* Selection Controls (Fusion 360 Style) */
+    .selection-column {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .btn-fusion-select {
+      height: 28px;
+      width: 100%;
+      background: var(--adsk-blue-light);
+      border: 1px solid var(--adsk-blue-border);
+      border-radius: var(--adsk-radius);
+      color: #005a9e;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .btn-fusion-select:hover {
+      background: #d8ecfe;
+      border-color: var(--adsk-blue);
+    }
+    .btn-fusion-select.active {
+      background: #cce7fd;
+      border-color: var(--adsk-blue);
+      color: #004578;
+    }
+    .selection-guide {
+      font-size: 11px;
+      color: var(--adsk-text-muted);
+      text-align: center;
+      display: none;
+      padding: 1px 0;
+    }
+    .selection-guide.open {
+      display: block;
+    }
+
+    .btn-fusion-secondary {
+      height: 28px;
+      width: 100%;
+      background: var(--adsk-panel-bg);
+      border: 1px solid var(--adsk-border);
+      border-radius: var(--adsk-radius);
+      color: var(--adsk-text-main);
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      cursor: pointer;
+      transition: all 0.12s;
+    }
+    .btn-fusion-secondary:hover {
+      background: #f0f0f0;
+      border-color: #a0a0a0;
+    }
+
+    .selection-badge-container {
+      display: flex;
+      width: 100%;
+      height: 28px;
+    }
+    .selection-badge-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      background: var(--adsk-panel-bg);
+      border: 1px solid var(--adsk-border);
+      border-right: none;
+      border-radius: var(--adsk-radius) 0 0 var(--adsk-radius);
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--adsk-text-main);
+    }
+    .selection-badge-clear {
+      width: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--adsk-panel-bg);
+      border: 1px solid var(--adsk-border);
+      border-radius: 0 var(--adsk-radius) var(--adsk-radius) 0;
+      color: #777777;
+      cursor: pointer;
+      font-size: 13px;
+      position: relative;
+    }
+    .selection-badge-clear:hover {
+      background: #ffebeb;
+      color: #d13438;
+      border-color: #f1999b;
+    }
+    .selection-badge-clear:hover::after {
+      content: "Clear body selection";
+      position: absolute;
+      bottom: 34px;
+      right: 0;
+      background: #2b2b2b;
+      color: #ffffff;
+      font-size: 11px;
+      padding: 3px 7px;
+      border-radius: 3px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Fusion Info Callout */
+    .fusion-callout {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: var(--adsk-blue-light);
+      border: 1px solid var(--adsk-blue-border);
+      border-radius: var(--adsk-radius);
+      padding: 8px 10px;
+      font-size: 11.5px;
+      color: #004578;
+      line-height: 1.35;
+    }
+    .fusion-callout-icon {
+      flex-shrink: 0;
+      width: 16px;
+      height: 16px;
+      color: var(--adsk-blue);
+    }
+    .fusion-callout-close {
+      flex-shrink: 0;
+      width: 14px;
+      height: 14px;
+      color: #5c9cd4;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .fusion-callout-close:hover {
+      color: #004578;
+    }
+
+    /* Bodies Section & Fusion Table Header with Search */
+    .bodies-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .bodies-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .bodies-heading {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #111111;
+    }
+    .fusion-search {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid var(--adsk-border);
+      border-radius: var(--adsk-radius);
+      padding: 2px 7px;
+      background: var(--adsk-panel-bg);
+      width: 150px;
+      height: 25px;
+    }
+    .fusion-search:focus-within {
+      border-color: var(--adsk-blue);
+    }
+    .fusion-search input {
+      border: none;
+      outline: none;
+      font-size: 11.5px;
+      color: var(--adsk-text-main);
+      width: 100%;
+      background: transparent;
+      font-family: inherit;
+    }
+
+    /* Autodesk Fusion Table */
+    .fusion-table-box {
+      border: 1px solid var(--adsk-border);
+      border-radius: var(--adsk-radius);
+      overflow: hidden;
+      background: var(--adsk-panel-bg);
+    }
+    .fusion-table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    .fusion-table th {
+      background: var(--adsk-header-bg);
+      padding: 6px 5px;
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #333333;
+      text-align: left;
+      border-bottom: 1px solid var(--adsk-border);
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+    .fusion-table th.col-num {
+      width: 22px;
+      text-align: center;
+      border-right: 1px solid var(--adsk-border-light);
+    }
+    .fusion-table th.col-body {
+      padding-left: 8px;
+      border-right: 1px solid var(--adsk-border-light);
+    }
+    .fusion-table th.col-filament {
+      width: 134px;
+      padding-left: 8px;
+      border-right: 1px solid var(--adsk-border-light);
+    }
+    .fusion-table th.col-qty {
+      width: 48px;
+      text-align: center;
+      border-right: 1px solid var(--adsk-border-light);
+    }
+    .fusion-table th.col-act {
+      width: 26px;
+      text-align: center;
+    }
+
+    .table-scroll {
+      max-height: 210px;
+      overflow-y: auto;
+    }
+    .table-scroll::-webkit-scrollbar {
+      width: 5px;
+    }
+    .table-scroll::-webkit-scrollbar-thumb {
+      background: #c0c0c0;
+      border-radius: 3px;
+    }
+
+    .fusion-table td {
+      padding: 5px 5px;
+      font-size: 12px;
+      color: var(--adsk-text-main);
+      border-bottom: 1px solid var(--adsk-border-light);
+      vertical-align: middle;
+    }
+    .fusion-table tr:hover td {
+      background-color: #f7f9fa;
+    }
+    .fusion-table tr.row-active td {
+      background-color: var(--adsk-blue-light) !important;
+      border-bottom-color: var(--adsk-blue-border);
+    }
+    .fusion-table td.col-num {
+      text-align: center;
+      color: var(--adsk-text-muted);
+      font-size: 11px;
+      border-right: 1px solid var(--adsk-border-light);
+    }
+    .fusion-table td.col-body {
+      padding-left: 6px;
+      border-right: 1px solid var(--adsk-border-light);
+    }
+    .body-cell {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      cursor: pointer;
+    }
+    .body-color-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(0,0,0,0.25);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+    }
+    .body-name {
+      font-weight: 500;
+      color: #1a1a1a;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 12px;
+    }
+
+    /* Filament Button */
+    .fusion-table td.col-filament {
+      border-right: 1px solid var(--adsk-border-light);
+      padding: 3px 5px;
+    }
+    .filament-btn {
+      width: 100%;
+      height: 24px;
+      padding: 0 6px;
+      background: var(--adsk-panel-bg);
+      border: 1px solid var(--adsk-border);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-size: 11px;
+      color: var(--adsk-text-main);
+      font-family: inherit;
+    }
+    .filament-btn:hover {
+      border-color: #999999;
+    }
+    .filament-btn-left {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .filament-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 1px solid rgba(0,0,0,0.2);
+    }
+
+    /* Qty Stepper (Fusion Style) */
+    .fusion-table td.col-qty {
+      border-right: 1px solid var(--adsk-border-light);
+      padding: 3px 4px;
+      text-align: center;
+    }
+    .stepper-box {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--adsk-border);
+      border-radius: 3px;
+      background: var(--adsk-panel-bg);
+      height: 24px;
+      width: 44px;
+      overflow: hidden;
+    }
+    .stepper-val {
+      flex: 1;
+      text-align: center;
+      font-size: 11.5px;
+      font-weight: 500;
+      color: var(--adsk-text-main);
+    }
+    .stepper-btns {
+      display: flex;
+      flex-direction: column;
+      border-left: 1px solid var(--adsk-border);
+      width: 14px;
+      height: 100%;
+    }
+    .stepper-btn {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f7f7f7;
+      cursor: pointer;
+      color: #666666;
+      font-size: 7px;
+      border: none;
+    }
+    .stepper-btn:first-child {
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .stepper-btn:hover {
+      background: #e5e5e5;
+      color: #111111;
+    }
+
+    .fusion-table td.col-act {
+      text-align: center;
+    }
+    .btn-del-row {
+      background: none;
+      border: none;
+      color: #999999;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 3px;
+      border-radius: 3px;
+    }
+    .btn-del-row:hover {
+      color: #d13438;
+      background: #ffebeb;
+    }
+
+    /* Collapsible Settings Group (Native Fusion Group Style) */
+    .fusion-group {
+      border: 1px solid var(--adsk-border);
+      border-radius: var(--adsk-radius);
+      background: var(--adsk-panel-bg);
+      overflow: hidden;
+    }
+    .fusion-group-header {
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      background: #f0f0f0;
+      border-bottom: 1px solid transparent;
+    }
+    .fusion-group-header:hover {
+      background: #eaeaea;
+    }
+    .fusion-group-header.open {
+      border-bottom-color: var(--adsk-border);
+    }
+    .fusion-group-title {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 12px;
+      color: #222222;
+    }
+    .chevron-icon {
+      width: 13px;
+      height: 13px;
+      color: #555555;
+      transition: transform 0.15s;
+    }
+    .chevron-icon.open {
+      transform: rotate(180deg);
+    }
+    .fusion-group-body {
+      padding: 11px 12px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      background: var(--adsk-panel-bg);
+    }
+    .fusion-group-body.open {
+      display: flex;
+    }
+
+    .path-input-wrap {
+      display: flex;
+      width: 100%;
+      height: 28px;
+    }
+    .fusion-input {
+      flex: 1;
+      padding: 0 8px;
+      border: 1px solid var(--adsk-border);
+      border-right: none;
+      border-radius: var(--adsk-radius) 0 0 var(--adsk-radius);
+      font-size: 11.5px;
+      color: var(--adsk-text-main);
+      outline: none;
+      background: var(--adsk-panel-bg);
+      font-family: inherit;
+    }
+    .fusion-input:focus {
+      border-color: var(--adsk-blue);
+    }
+    .btn-fusion-browse {
+      width: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--adsk-border);
+      border-radius: 0 var(--adsk-radius) var(--adsk-radius) 0;
+      background: #f7f7f7;
+      color: #444444;
+      cursor: pointer;
+    }
+    .btn-fusion-browse:hover {
+      background: #e8e8e8;
+    }
+
+    .group-subheading {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--adsk-text-main);
+      margin-top: 2px;
+    }
+    .fusion-field-select {
+      height: 26px;
+      border: 1px solid var(--adsk-border);
+      border-radius: var(--adsk-radius);
+      padding: 0 7px;
+      font-size: 11.5px;
+      color: var(--adsk-text-main);
+      background: var(--adsk-panel-bg);
+      outline: none;
+      font-family: inherit;
+    }
+
+    /* Fusion Toggle Switch */
+    .toggle-item {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+    }
+    .toggle-track {
+      position: relative;
+      width: 32px;
+      height: 18px;
+      background: #c8c8c8;
+      border-radius: 9px;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+    .toggle-track.active {
+      background: var(--adsk-blue);
+    }
+    .toggle-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 14px;
+      height: 14px;
+      background: #ffffff;
+      border-radius: 50%;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+      transition: transform 0.15s;
+    }
+    .toggle-track.active .toggle-thumb {
+      transform: translateX(14px);
+    }
+    .toggle-text {
+      font-size: 11.5px;
+      color: var(--adsk-text-main);
+      font-weight: 500;
+    }
+
+    /* Filament Picker Modal Popover */
+    .filament-popover {
+      position: fixed;
+      z-index: 1000;
+      background: #ffffff;
+      border: 1px solid var(--adsk-border);
+      border-radius: var(--adsk-radius);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.2);
+      width: 240px;
+      padding: 12px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .filament-popover.open {
+      display: flex;
+    }
+    .popover-header {
+      font-size: 12px;
+      font-weight: 700;
+      color: #111111;
+    }
+    .popover-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .popover-lbl {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--adsk-text-muted);
+    }
+    .popover-select {
+      height: 26px;
+      border: 1px solid var(--adsk-border);
+      border-radius: 3px;
+      padding: 0 6px;
+      font-size: 11.5px;
+      background: #ffffff;
+      font-family: inherit;
+    }
+    .color-swatches {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+    .swatch-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .swatch-btn:hover {
+      transform: scale(1.15);
+    }
+    .swatch-btn.active {
+      border-color: var(--adsk-blue);
+    }
+    .swatch-circle {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      border: 1px solid rgba(0,0,0,0.15);
+    }
+    .popover-preview {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 8px;
+      background: #f7f7f7;
+      border: 1px solid var(--adsk-border-light);
+      border-radius: 3px;
+      font-size: 11.5px;
+      font-weight: 500;
+    }
+    .popover-btns {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+    .popover-btn-c {
+      height: 24px;
+      padding: 0 10px;
+      background: #ffffff;
+      border: 1px solid var(--adsk-border);
+      border-radius: 3px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+    .popover-btn-a {
+      height: 24px;
+      padding: 0 12px;
+      background: var(--adsk-blue);
+      border: none;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+    }
+
+    /* Fusion Bottom Dialog Bar - Matches native Autodesk Fusion style */
+    .fusion-dialog-footer {
+      height: 42px;
+      padding: 0 14px;
+      background: var(--adsk-bg);
+      border-top: 1px solid var(--adsk-border);
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+    .btn-help {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #777777;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .btn-help:hover {
+      background: #444444;
+    }
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn-fusion-cancel {
+      height: 28px;
+      padding: 0 14px;
+      background: var(--adsk-panel-bg);
+      border: 1px solid var(--adsk-border);
+      border-radius: var(--adsk-radius);
+      color: var(--adsk-text-main);
+      font-size: 12px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .btn-fusion-cancel:hover {
+      background: #f0f0f0;
+      border-color: #999999;
+    }
+    .btn-fusion-primary {
+      height: 28px;
+      padding: 0 16px;
+      background: var(--adsk-blue);
+      border: none;
+      border-radius: var(--adsk-radius);
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.12s;
+    }
+    .btn-fusion-primary:hover {
+      background: var(--adsk-blue-hover);
+    }
+    .btn-fusion-primary:active {
+      background: var(--adsk-blue-active);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Main Content -->
+  <div class="content-area">
+
+    <!-- Destination Row -->
+    <div class="form-row">
+      <div class="form-label">Destination</div>
+      <div style="position:relative;">
+        <button class="fusion-select-btn" id="destBtn">
+          <div class="fusion-select-content" id="destBtnContent">
+            <svg style="width:18px;height:18px;" viewBox="0 0 100 100" fill="currentColor">
+              <ellipse cx="50" cy="52" rx="38" ry="36" fill="#ffffff" stroke="#111827" stroke-width="6"/>
+              <circle cx="24" cy="22" r="14" fill="#111827"/><circle cx="76" cy="22" r="14" fill="#111827"/>
+              <ellipse cx="36" cy="50" rx="11" ry="14" fill="#111827" transform="rotate(-15 36 50)"/>
+              <ellipse cx="64" cy="50" rx="11" ry="14" fill="#111827" transform="rotate(15 64 50)"/>
+              <circle cx="38" cy="48" r="3.5" fill="#ffffff"/><circle cx="62" cy="48" r="3.5" fill="#ffffff"/>
+              <ellipse cx="50" cy="64" rx="6" ry="4" fill="#111827"/>
+            </svg>
+            <span>Open in Bambu Studio</span>
+          </div>
+          <svg style="width:12px;height:12px;color:#666666;" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+        </button>
+        <div class="dropdown-menu" id="destMenu">
+          <div class="dropdown-item active" data-dest="bambu">
+            <svg style="width:18px;height:18px;" viewBox="0 0 100 100" fill="currentColor">
+              <ellipse cx="50" cy="52" rx="38" ry="36" fill="#ffffff" stroke="#111827" stroke-width="6"/>
+              <circle cx="24" cy="22" r="14" fill="#111827"/><circle cx="76" cy="22" r="14" fill="#111827"/>
+              <ellipse cx="36" cy="50" rx="11" ry="14" fill="#111827" transform="rotate(-15 36 50)"/>
+              <ellipse cx="64" cy="50" rx="11" ry="14" fill="#111827" transform="rotate(15 64 50)"/>
+              <circle cx="38" cy="48" r="3.5" fill="#ffffff"/><circle cx="62" cy="48" r="3.5" fill="#ffffff"/>
+              <ellipse cx="50" cy="64" rx="6" ry="4" fill="#111827"/>
+            </svg>
+            <span>Open in Bambu Studio</span>
+          </div>
+          <div class="dropdown-item" data-dest="webapp">
+            <svg style="width:16px;height:16px;color:#0696D7;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span>Send to FabLab Web App</span>
+          </div>
+          <div class="dropdown-item" data-dest="folder">
+            <svg style="width:16px;height:16px;color:#d97706;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            </svg>
+            <span>Save to Local Folder</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selection Row -->
+    <div class="form-row">
+      <div class="form-label">Selection</div>
+      <div class="selection-column">
+        <button class="btn-fusion-select" id="btnSelectMode" title="Toggle canvas selection mode">
+          <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M4 0l16 12.279-6.78 1.07 4.156 8.651-3.633 1.74-4.15-8.636-5.593 4.896z"/>
+          </svg>
+          <span id="selectBtnText">Select</span>
+        </button>
+        <div class="selection-guide" id="selectionGuide">
+          Click bodies or components in the canvas or Browser. Press Esc to finish.
+        </div>
+        <button class="btn-fusion-secondary" id="btnSelectAll" title="Select all currently visible solid bodies">
+          <svg style="width:14px;height:14px;color:#555555;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+          </svg>
+          <span>Select All Visible</span>
+        </button>
+        <div class="selection-badge-container">
+          <div class="selection-badge-main">
+            <svg style="width:14px;height:14px;color:#444444;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            </svg>
+            <span id="badgeCountText">6 bodies selected</span>
+          </div>
+          <div class="selection-badge-clear" id="btnClearSelection" title="Clear body selection">✕</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info Callout -->
+    <div class="fusion-callout" id="infoCallout">
+      <svg class="fusion-callout-icon" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+      </svg>
+      <div style="flex:1;">
+        Selecting a component in the Browser will include all its bodies and subcomponents.
+      </div>
+      <div class="fusion-callout-close" id="closeCallout">✕</div>
+    </div>
+
+    <!-- Bodies Section & Table -->
+    <div class="bodies-section">
+      <div class="bodies-bar">
+        <div class="bodies-heading" id="bodiesTitle">Bodies (6)</div>
+        <div class="fusion-search">
+          <svg style="width:12px;height:12px;color:#888888;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="searchInput" placeholder="Search bodies..." />
+        </div>
+      </div>
+
+      <div class="fusion-table-box table-scroll">
+        <table class="fusion-table">
+          <thead>
+            <tr>
+              <th class="col-num">#</th>
+              <th class="col-body">Body</th>
+              <th class="col-filament">Filament</th>
+              <th class="col-qty">Qty</th>
+              <th class="col-act"></th>
+            </tr>
+          </thead>
+          <tbody id="bodiesTbody">
+            <!-- Dynamic Rows -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Collapsible Settings Group -->
+    <div class="fusion-group">
+      <div class="fusion-group-header" id="groupHeader">
+        <div class="fusion-group-title">
+          <svg style="width:14px;height:14px;color:#444444;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+          </svg>
+          <span>Settings</span>
+        </div>
+        <svg class="chevron-icon open" id="groupChevron" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+      </div>
+
+      <div class="fusion-group-body open" id="groupBody">
+        <div id="bambuPathRow" class="form-row">
+          <div class="form-label">Bambu Path</div>
+          <div class="path-input-wrap">
+            <input type="text" class="fusion-input" id="bambuPathInput" value="C:\Program Files\Bambu Studio" />
+            <div class="btn-fusion-browse" id="browseBambuBtn" title="Browse folder">📁</div>
+          </div>
+        </div>
+
+        <div id="folderRows" style="display:none;flex-direction:column;gap:8px;">
+          <div class="form-row">
+            <div class="form-label">Folder Name</div>
+            <input type="text" class="fusion-input" id="folderNameInput" style="border-radius:4px;border-right:1px solid var(--adsk-border);height:28px;" value="Fusion_STLs" />
+          </div>
+          <div class="form-row">
+            <div class="form-label">Save Location</div>
+            <div class="path-input-wrap">
+              <input type="text" class="fusion-input" id="folderRootInput" value="C:\Users\ADMIN\Documents" />
+              <div class="btn-fusion-browse" id="browseFolderBtn" title="Browse folder">📁</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="webappRow" style="display:none;" class="form-row">
+          <div class="form-label">Web App URL</div>
+          <input type="text" class="fusion-input" id="webappUrlInput" style="border-radius:4px;border-right:1px solid var(--adsk-border);height:28px;" value="http://localhost:8000" />
+        </div>
+
+        <div class="group-subheading">Export Options</div>
+        <div class="form-row">
+          <div class="form-label">Format</div>
+          <select class="fusion-field-select" id="settingFormat">
+            <option value="3mf" selected>3MF (Recommended)</option>
+            <option value="stl">STL (Standard)</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-label">Units</div>
+          <select class="fusion-field-select" id="settingUnits">
+            <option value="mm" selected>Millimeters (mm)</option>
+            <option value="inch">Inches (in)</option>
+          </select>
+        </div>
+
+        <div class="toggle-item" id="toggleOpenApp">
+          <div class="toggle-track active" id="swOpenApp"><div class="toggle-thumb"></div></div>
+          <span class="toggle-text" id="lblOpenApp">Open Bambu Studio after export</span>
+        </div>
+
+        <div class="toggle-item" id="toggleSingleProj">
+          <div class="toggle-track active" id="swSingleProj"><div class="toggle-thumb"></div></div>
+          <span class="toggle-text">Create a single project with all parts</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Filament Picker Popover -->
+  <div class="filament-popover" id="filamentPopover">
+    <div class="popover-header">Filament</div>
+    <div class="popover-row">
+      <span class="popover-lbl">Material</span>
+      <select class="popover-select" id="pickerMat">
+        <option value="PLA">PLA</option>
+        <option value="PETG">PETG</option>
+        <option value="ABS">ABS</option>
+        <option value="TPU">TPU</option>
+        <option value="PC">PC</option>
+        <option value="PA-CF">PA-CF</option>
+      </select>
+    </div>
+    <div class="popover-row">
+      <span class="popover-lbl">Color</span>
+      <div class="color-swatches" id="swatchesGrid"></div>
+    </div>
+    <div class="popover-preview">
+      <div class="filament-dot" id="previewDot" style="background:#71717a;"></div>
+      <span id="previewText">PLA · Grey</span>
+    </div>
+    <div class="popover-btns">
+      <button class="popover-btn-c" id="btnPickerCancel">Cancel</button>
+      <button class="popover-btn-a" id="btnPickerApply">Apply</button>
+    </div>
+  </div>
+
+  <!-- Fusion Dialog Footer -->
+  <div class="fusion-dialog-footer">
+    <button class="btn-fusion-cancel" id="cancelBtn">Cancel</button>
+    <button class="btn-fusion-primary" id="exportBtn">
+      <span id="exportBtnText">Export & Open</span>
+      <svg style="width:13px;height:13px;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+      </svg>
+    </button>
+  </div>
+
+  <script>
+    let currentDest = 'bambu';
+    let bodiesList = [];
+    let isSelecting = false;
+    let selectedRowIndices = new Set();
+    let activePickerIdx = null;
+
+    const FILAMENT_COLORS = [
+      { name: 'Grey', hex: '#71717a' },
+      { name: 'White', hex: '#ffffff' },
+      { name: 'Black', hex: '#18181b' },
+      { name: 'Red', hex: '#ef4444' },
+      { name: 'Orange', hex: '#f97316' },
+      { name: 'Yellow', hex: '#eab308' },
+      { name: 'Green', hex: '#22c55e' },
+      { name: 'Blue', hex: '#0696D7' },
+      { name: 'Purple', hex: '#a855f7' },
+      { name: 'Pink', hex: '#ec4899' }
+    ];
+
+    let pickerMat = 'PLA';
+    let pickerColor = FILAMENT_COLORS[0];
+
+    function getCadIcon(shape, colorHex) {
+      const col = colorHex || '#5d8588';
+      switch (shape) {
+        case 'cylinder':
+          return `<svg viewBox="0 0 40 40" width="26" height="26">
+            <ellipse cx="20" cy="27" rx="12" ry="6" fill="${col}" style="filter:brightness(0.7);" stroke="#222" stroke-width="1.2"/>
+            <path d="M8 13 v14 A12 6 0 0 0 32 27 v-14 Z" fill="${col}" style="filter:brightness(0.85);"/>
+            <line x1="8" y1="13" x2="8" y2="27" stroke="#222" stroke-width="1.2"/>
+            <line x1="32" y1="13" x2="32" y2="27" stroke="#222" stroke-width="1.2"/>
+            <path d="M8 27 A12 6 0 0 0 32 27" fill="none" stroke="#222" stroke-width="1.2"/>
+            <ellipse cx="20" cy="13" rx="12" ry="6" fill="${col}" style="filter:brightness(1.15);" stroke="#222" stroke-width="1.2"/>
+          </svg>`;
+
+        case 'triangle':
+        case 'prism':
+          return `<svg viewBox="0 0 40 40" width="26" height="26">
+            <polygon points="20,7 34,17 20,23" fill="${col}" style="filter:brightness(1.2);" stroke="#222" stroke-width="1.2"/>
+            <polygon points="20,23 34,17 34,31 20,35" fill="${col}" style="filter:brightness(0.75);" stroke="#222" stroke-width="1.2"/>
+            <polygon points="20,23 6,17 6,31 20,35" fill="${col}" style="filter:brightness(0.95);" stroke="#222" stroke-width="1.2"/>
+            <polygon points="20,7 6,17 20,23" fill="${col}" style="filter:brightness(1.1);" stroke="#222" stroke-width="1.2"/>
+          </svg>`;
+
+        case 'cube':
+        case 'box':
+          return `<svg viewBox="0 0 40 40" width="26" height="26">
+            <polygon points="20,8 32,15 20,22 8,15" fill="${col}" style="filter:brightness(1.2);" stroke="#222" stroke-width="1.2"/>
+            <polygon points="8,15 20,22 20,33 8,26" fill="${col}" style="filter:brightness(0.9);" stroke="#222" stroke-width="1.2"/>
+            <polygon points="20,22 32,15 32,26 20,33" fill="${col}" style="filter:brightness(0.7);" stroke="#222" stroke-width="1.2"/>
+          </svg>`;
+
+        case 'organic':
+          return `<svg viewBox="0 0 40 40" width="26" height="26">
+            <path d="M10 20 C10 14 16 14 20 18 C24 22 28 20 30 16 L30 26 C28 30 24 32 20 28 C16 24 10 24 10 30 Z" fill="${col}" style="filter:brightness(0.8);" stroke="#222" stroke-width="1.2"/>
+            <path d="M10 16 C10 10 16 10 20 14 C24 18 28 16 30 12 C32 16 28 22 24 22 C18 22 14 18 10 16 Z" fill="${col}" style="filter:brightness(1.15);" stroke="#222" stroke-width="1.2"/>
+          </svg>`;
+
+        default:
+          return `<svg viewBox="0 0 40 40" width="26" height="26">
+            <polygon points="20,8 32,14 20,20 8,14" fill="${col}" style="filter:brightness(1.2);" stroke="#222" stroke-width="1.2"/>
+            <polygon points="8,14 20,20 20,32 8,26" fill="${col}" style="filter:brightness(0.9);" stroke="#222" stroke-width="1.2"/>
+            <polygon points="20,20 32,14 32,26 20,32" fill="${col}" style="filter:brightness(0.7);" stroke="#222" stroke-width="1.2"/>
+          </svg>`;
+      }
+    }
+
+    const DEFAULT_BODIES = [
+      { id: '1', name: 'Body1', material: 'PLA', colorName: 'Red', colorHex: '#e53935', quantity: 1, token: 'b1' },
+      { id: '2', name: 'Body2', material: 'PLA', colorName: 'Yellow', colorHex: '#fbc02d', quantity: 1, token: 'b2' },
+      { id: '3', name: 'Body3', material: 'PLA', colorName: 'Grey', colorHex: '#b0bec5', quantity: 1, token: 'b3' },
+      { id: '4', name: 'Body4', material: 'PLA', colorName: 'Red', colorHex: '#d32f2f', quantity: 1, token: 'b4' },
+      { id: '5', name: 'Body5', material: 'PLA', colorName: 'Yellow', colorHex: '#fbc02d', quantity: 1, token: 'b5' },
+      { id: '6', name: 'Body6', material: 'PLA', colorName: 'Blue', colorHex: '#1e88e5', quantity: 1, token: 'b6' }
+    ];
+
+    function sendToFusion(action, data = {}) {
+      if (window.adsk && typeof window.adsk.fusionSendData === 'function') {
+        try {
+          return window.adsk.fusionSendData(action, typeof data === 'string' ? data : JSON.stringify(data));
+        } catch (e) {
+          console.warn('fusionSendData error:', e);
+        }
+      }
+    }
+
+    window.fusionJavaScriptHandler = {
+      handle: function(action, data) {
+        try {
+          const payload = typeof data === 'string' ? JSON.parse(data) : data;
+          if (action === 'init') {
+            if (payload.bodies && Array.isArray(payload.bodies) && payload.bodies.length > 0) {
+              bodiesList = payload.bodies.map((b, idx) => {
+                const defaultCol = FILAMENT_COLORS[idx % FILAMENT_COLORS.length];
+                return {
+                  ...b,
+                  material: b.material || 'PLA',
+                  colorName: b.colorName || defaultCol.name,
+                  colorHex: b.colorHex || defaultCol.hex,
+                  quantity: b.quantity || 1
+                };
+              });
+              renderTable();
+            }
+            if (payload.bambuPath) document.getElementById('bambuPathInput').value = payload.bambuPath;
+            if (payload.defaultFolder) document.getElementById('folderRootInput').value = payload.defaultFolder;
+            if (payload.designName) document.getElementById('folderNameInput').value = payload.designName + '_STLs';
+          } else if (action === 'syncSelection') {
+            const tokens = new Set(payload.tokens || []);
+            const names = new Set(payload.names || []);
+
+            // 1. Check if any selected bodies from 3D/Browser are not in the table yet
+            if (payload.bodies && Array.isArray(payload.bodies) && payload.bodies.length > 0) {
+              payload.bodies.forEach(newB => {
+                const exists = bodiesList.some(item => (newB.token && item.token === newB.token) || item.name === newB.name);
+                if (!exists) {
+                  const defaultCol = FILAMENT_COLORS[bodiesList.length % FILAMENT_COLORS.length];
+                  bodiesList.push({
+                    ...newB,
+                    material: newB.material || 'PLA',
+                    colorName: newB.colorName || defaultCol.name,
+                    colorHex: newB.colorHex || defaultCol.hex,
+                    quantity: newB.quantity || 1
+                  });
+                }
+              });
+            }
+
+            // 2. Multi-select: highlight ALL selected bodies in the table
+            selectedRowIndices.clear();
+            bodiesList.forEach((b, idx) => {
+              if ((b.token && tokens.has(b.token)) || names.has(b.name)) {
+                selectedRowIndices.add(idx);
+              }
+            });
+
+            renderTable();
+
+            // Scroll the first selected row into view
+            if (selectedRowIndices.size > 0) {
+              const firstIdx = Array.from(selectedRowIndices)[0];
+              setTimeout(() => {
+                const rows = document.querySelectorAll('#bodiesTbody tr');
+                if (rows[firstIdx]) {
+                  rows[firstIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+                }
+              }, 40);
+            }
+          } else if (action === 'folderChosen' && payload.path) {
+            document.getElementById('folderRootInput').value = payload.path;
+          } else if (action === 'fileChosen' && payload.path) {
+            document.getElementById('bambuPathInput').value = payload.path;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
+    function renderTable() {
+      const tbody = document.getElementById('bodiesTbody');
+      const title = document.getElementById('bodiesTitle');
+      const badge = document.getElementById('badgeCountText');
+      const q = document.getElementById('searchInput').value.trim().toLowerCase();
+
+      const total = bodiesList.length;
+      title.textContent = `Bodies (${total})`;
+      badge.textContent = total === 1 ? '1 body selected' : `${total} bodies selected`;
+
+      if (total === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:20px;text-align:center;color:#888;font-size:11.5px;">No bodies selected.<br>Click bodies in canvas or Browser, or click "Select All Visible".</td></tr>`;
+        return;
+      }
+
+      const filtered = bodiesList.map((b, i) => ({ ...b, origIdx: i })).filter(b => {
+        if (!q) return true;
+        return (b.name || '').toLowerCase().includes(q) || (b.material || '').toLowerCase().includes(q) || (b.colorName || '').toLowerCase().includes(q);
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="padding:16px;text-align:center;color:#888;">No bodies matching "${escapeHtml(q)}".</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = '';
+      filtered.forEach((b) => {
+        const i = b.origIdx;
+        const tr = document.createElement('tr');
+        if (selectedRowIndices.has(i)) tr.classList.add('row-active');
+
+        tr.innerHTML = `
+          <td class="col-num">${i + 1}</td>
+          <td class="col-body">
+            <div class="body-cell" title="Click to highlight in 3D">
+              <div class="body-color-dot" style="background:${b.colorHex || '#5d8588'};"></div>
+              <span class="body-name">${escapeHtml(b.name || 'Body' + (i + 1))}</span>
+            </div>
+          </td>
+          <td class="col-filament">
+            <button class="filament-btn">
+              <div class="filament-btn-left">
+                <div class="filament-dot" style="background:${b.colorHex || '#71717a'};"></div>
+                <span>${escapeHtml(b.material || 'PLA')} · ${escapeHtml(b.colorName || 'Grey')}</span>
+              </div>
+              <svg style="width:9px;height:9px;color:#777;" viewBox="0 0 24 24" fill="currentColor"><path d="M7 10l5 5 5-5z"/></svg>
+            </button>
+          </td>
+          <td class="col-qty">
+            <div class="stepper-box">
+              <span class="stepper-val">${b.quantity || 1}</span>
+              <div class="stepper-btns">
+                <button class="stepper-btn btn-up">▲</button>
+                <button class="stepper-btn btn-down">▼</button>
+              </div>
+            </div>
+          </td>
+          <td class="col-act">
+            <button class="btn-del-row" title="Remove">✕</button>
+          </td>
+        `;
+
+        tr.style.cursor = 'pointer';
+        tr.addEventListener('click', (e) => {
+          if (e.target.closest('.filament-btn') || e.target.closest('.stepper-btns') || e.target.closest('.btn-del-row')) {
+            return;
+          }
+          if (e.ctrlKey || e.metaKey || e.shiftKey) {
+            if (selectedRowIndices.has(i)) {
+              selectedRowIndices.delete(i);
+            } else {
+              selectedRowIndices.add(i);
+            }
+          } else {
+            selectedRowIndices.clear();
+            selectedRowIndices.add(i);
+          }
+          renderTable();
+          sendToFusion('highlightBody', { token: b.token, name: b.name });
+        });
+
+        const fBtn = tr.querySelector('.filament-btn');
+        fBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openPicker(i, fBtn);
+        });
+
+        const qVal = tr.querySelector('.stepper-val');
+        tr.querySelector('.btn-up').addEventListener('click', (e) => {
+          e.stopPropagation();
+          bodiesList[i].quantity = (bodiesList[i].quantity || 1) + 1;
+          qVal.textContent = bodiesList[i].quantity;
+        });
+        tr.querySelector('.btn-down').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if ((bodiesList[i].quantity || 1) > 1) {
+            bodiesList[i].quantity -= 1;
+            qVal.textContent = bodiesList[i].quantity;
+          }
+        });
+
+        tr.querySelector('.btn-del-row').addEventListener('click', (e) => {
+          e.stopPropagation();
+          bodiesList.splice(i, 1);
+          if (selectedRowIdx === i) selectedRowIdx = null;
+          renderTable();
+          sendToFusion('removeBody', { token: b.token });
+        });
+
+        tbody.appendChild(tr);
+      });
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    // Swatches
+    function initSwatches() {
+      const grid = document.getElementById('swatchesGrid');
+      grid.innerHTML = '';
+      FILAMENT_COLORS.forEach(c => {
+        const btn = document.createElement('div');
+        btn.className = 'swatch-btn' + (c.name === pickerColor.name ? ' active' : '');
+        btn.innerHTML = `<div class="swatch-circle" style="background:${c.hex};"></div>`;
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          grid.querySelectorAll('.swatch-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          pickerColor = c;
+          updatePickerUI();
+        });
+        grid.appendChild(btn);
+      });
+    }
+
+    function updatePickerUI() {
+      document.getElementById('previewDot').style.background = pickerColor.hex;
+      document.getElementById('previewText').textContent = `${pickerMat} · ${pickerColor.name}`;
+    }
+
+    document.getElementById('pickerMat').addEventListener('change', (e) => {
+      pickerMat = e.target.value;
+      updatePickerUI();
+    });
+
+    function openPicker(i, anchor) {
+      activePickerIdx = i;
+      const b = bodiesList[i];
+      pickerMat = b.material || 'PLA';
+      pickerColor = FILAMENT_COLORS.find(c => c.name === b.colorName) || FILAMENT_COLORS[0];
+      document.getElementById('pickerMat').value = pickerMat;
+      initSwatches();
+      updatePickerUI();
+
+      const rect = anchor.getBoundingClientRect();
+      const pop = document.getElementById('filamentPopover');
+      pop.style.top = Math.min(window.innerHeight - 250, Math.max(10, rect.bottom - 40)) + 'px';
+      pop.style.left = Math.max(10, rect.left - 70) + 'px';
+      pop.classList.add('open');
+    }
+
+    document.getElementById('btnPickerCancel').addEventListener('click', (e) => {
+      e.stopPropagation();
+      document.getElementById('filamentPopover').classList.remove('open');
+    });
+
+    document.getElementById('btnPickerApply').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (activePickerIdx !== null && bodiesList[activePickerIdx]) {
+        bodiesList[activePickerIdx].material = pickerMat;
+        bodiesList[activePickerIdx].colorName = pickerColor.name;
+        bodiesList[activePickerIdx].colorHex = pickerColor.hex;
+        renderTable();
+      }
+      document.getElementById('filamentPopover').classList.remove('open');
+    });
+
+    document.getElementById('searchInput').addEventListener('input', renderTable);
+
+    // Destination Dropdown
+    const destBtn = document.getElementById('destBtn');
+    const destMenu = document.getElementById('destMenu');
+    const destContent = document.getElementById('destBtnContent');
+    const bambuRow = document.getElementById('bambuPathRow');
+    const folderRows = document.getElementById('folderRows');
+    const webappRow = document.getElementById('webappRow');
+    const exportText = document.getElementById('exportBtnText');
+    const lblOpen = document.getElementById('lblOpenApp');
+
+    destBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      destMenu.classList.toggle('open');
+    });
+
+    document.addEventListener('click', () => {
+      destMenu.classList.remove('open');
+      document.getElementById('filamentPopover').classList.remove('open');
+    });
+    document.getElementById('filamentPopover').addEventListener('click', (e) => e.stopPropagation());
+
+    destMenu.querySelectorAll('.dropdown-item').forEach(it => {
+      it.addEventListener('click', (e) => {
+        e.stopPropagation();
+        destMenu.querySelectorAll('.dropdown-item').forEach(x => x.classList.remove('active'));
+        it.classList.add('active');
+        destMenu.classList.remove('open');
+
+        currentDest = it.getAttribute('data-dest');
+        destContent.innerHTML = it.innerHTML;
+
+        bambuRow.style.display = currentDest === 'bambu' ? 'grid' : 'none';
+        folderRows.style.display = currentDest === 'folder' ? 'flex' : 'none';
+        webappRow.style.display = currentDest === 'webapp' ? 'grid' : 'none';
+
+        if (currentDest === 'bambu') {
+          exportText.textContent = 'Export & Open';
+          lblOpen.textContent = 'Open Bambu Studio after export';
+        } else if (currentDest === 'folder') {
+          exportText.textContent = 'Export to Folder';
+          lblOpen.textContent = 'Reveal in Windows Explorer after export';
+        } else {
+          exportText.textContent = 'Send to Web App';
+          lblOpen.textContent = 'Open browser after export';
+        }
+      });
+    });
+
+    // Selection Mode
+    const btnSelect = document.getElementById('btnSelectMode');
+    const selectTxt = document.getElementById('selectBtnText');
+    const guide = document.getElementById('selectionGuide');
+
+    btnSelect.addEventListener('click', () => {
+      isSelecting = !isSelecting;
+      if (isSelecting) {
+        btnSelect.classList.add('active');
+        selectTxt.textContent = '✓ Selecting...';
+        guide.classList.add('open');
+      } else {
+        btnSelect.classList.remove('active');
+        selectTxt.textContent = 'Select';
+        guide.classList.remove('open');
+      }
+      sendToFusion('activateSelectMode', { active: isSelecting });
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (isSelecting) {
+          isSelecting = false;
+          btnSelect.classList.remove('active');
+          selectTxt.textContent = 'Select';
+          guide.classList.remove('open');
+          sendToFusion('activateSelectMode', { active: false });
+        }
+        document.getElementById('filamentPopover').classList.remove('open');
+      }
+    });
+
+    document.getElementById('btnSelectAll').addEventListener('click', () => {
+      sendToFusion('selectAllVisible', {});
+    });
+
+    document.getElementById('btnClearSelection').addEventListener('click', () => {
+      bodiesList = [];
+      selectedRowIdx = null;
+      renderTable();
+      sendToFusion('clearSelection', {});
+    });
+
+    document.getElementById('closeCallout').addEventListener('click', () => {
+      document.getElementById('infoCallout').style.display = 'none';
+    });
+
+    // Settings Group Toggle
+    const gHdr = document.getElementById('groupHeader');
+    const gChev = document.getElementById('groupChevron');
+    const gBody = document.getElementById('groupBody');
+
+    gHdr.addEventListener('click', () => {
+      gHdr.classList.toggle('open');
+      gChev.classList.toggle('open');
+      gBody.classList.toggle('open');
+    });
+
+    // Switches
+    const swOpen = document.getElementById('swOpenApp');
+    document.getElementById('toggleOpenApp').addEventListener('click', () => {
+      swOpen.classList.toggle('active');
+    });
+
+    const swSingle = document.getElementById('swSingleProj');
+    document.getElementById('toggleSingleProj').addEventListener('click', () => {
+      swSingle.classList.toggle('active');
+    });
+
+    // Browse
+    document.getElementById('browseFolderBtn').addEventListener('click', () => {
+      sendToFusion('browseFolder', { current: document.getElementById('folderRootInput').value });
+    });
+    document.getElementById('browseBambuBtn').addEventListener('click', () => {
+      sendToFusion('browseFile', { current: document.getElementById('bambuPathInput').value });
+    });
+
+    // Footer Actions
+    document.getElementById('cancelBtn').addEventListener('click', () => {
+      sendToFusion('cancel', {});
+    });
+
+    document.getElementById('exportBtn').addEventListener('click', () => {
+      if (bodiesList.length === 0) {
+        alert('Please select at least one body to export.');
+        return;
+      }
+      const expBtn = document.getElementById('exportBtn');
+      const orig = exportText.textContent;
+      exportText.textContent = 'Exporting...';
+      expBtn.disabled = true;
+
+      const payload = {
+        destination: currentDest,
+        bodies: bodiesList,
+        bambuPath: document.getElementById('bambuPathInput').value,
+        folderName: document.getElementById('folderNameInput').value,
+        rootFolder: document.getElementById('folderRootInput').value,
+        webappUrl: document.getElementById('webappUrlInput').value,
+        format: document.getElementById('settingFormat').value,
+        units: document.getElementById('settingUnits').value,
+        openAfterExport: swOpen.classList.contains('active'),
+        singleProject: swSingle.classList.contains('active')
+      };
+
+      sendToFusion('export', payload);
+
+      setTimeout(() => {
+        exportText.textContent = orig;
+        expBtn.disabled = false;
+      }, 1500);
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      initSwatches();
+      bodiesList = [...DEFAULT_BODIES];
+      renderTable();
+      sendToFusion('ready', {});
+    });
+  </script>
+</body>
+</html>

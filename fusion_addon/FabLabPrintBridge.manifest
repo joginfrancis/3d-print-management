@@ -1,0 +1,13 @@
+{
+    "autodeskProduct": "Fusion360",
+    "type": "addin",
+    "id": "e34c1bc7-c266-4d09-8901-3a697d8de644-fablab-bridge",
+    "author": "FabLab",
+    "description": {
+        "": "1-click export of selected bodies and components directly to the FabLab 3D Print Plate Builder web application."
+    },
+    "version": "1.0.0",
+    "runOnStartup": false,
+    "supportedOS": "windows|mac",
+    "editEnabled": true
+}
